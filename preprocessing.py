@@ -26,9 +26,28 @@ def preprocess_data(X,y):
         print("Class Distribution")
         print(pd.Series(y).value_counts())
 
-    if len(pd.Series(y).unique())<20:
-        X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42,stratify=y)
-    else:
-        X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2,random_state=42)
+    
+    test_size = 0.2
+    stratify_arg = None
+    if len(pd.Series(y).unique()) < 20:
+        counts = pd.Series(y).value_counts()
+        # require at least two samples per class
+        if counts.min() >= 2:
+            stratify_arg = y
+        else:
+            # if some class is too rare, skip stratification
+            stratify_arg = None
+    try:
+        X_train, X_test, y_train, y_test = train_test_split(
+            X,
+            y,
+            test_size=test_size,
+            random_state=42,
+            stratify=stratify_arg,
+        )
+    except ValueError:
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=test_size, random_state=42
+        )
 
     return X_train,X_test,y_train,y_test           
